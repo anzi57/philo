@@ -4,13 +4,13 @@ void	wait_sync_start(t_shared *shared_args)
 {
 	while (1)
 	{
-		pwrap(pthread_mutex_lock(&shared_args->shared_mutex), 6);
-		if (shared_args->flag == DEFAULT)
+		pwrap(pthread_mutex_lock(&shared_args->start_mutex), 6);
+		if (shared_args->start_flag == true)
 		{
-			pwrap(pthread_mutex_unlock(&shared_args->shared_mutex), 7);
+			pwrap(pthread_mutex_unlock(&shared_args->start_mutex), 7);
 			return ;
 		}
-		pwrap(pthread_mutex_unlock(&shared_args->shared_mutex), 7);
+		pwrap(pthread_mutex_unlock(&shared_args->start_mutex), 7);
 	}
 }
 
@@ -32,6 +32,20 @@ void	*all_philos_eaten(t_philo **philo_arr)
 	return (NULL);
 }
 
+void	set_philos_initial_time_last_ate(t_philo **philo_arr)
+{
+	int	i;
+
+	i = -1;
+	while (++i < (*philo_arr)->shared_args->philo_max)
+	{
+		pwrap(pthread_mutex_lock(&((*philo_arr)[i]).local_mutex), 6);
+		if ((*philo_arr)[i].time_last_ate == 0)
+			(*philo_arr)[i].time_last_ate = get_time_ms();
+		pwrap(pthread_mutex_unlock(&((*philo_arr)[i]).local_mutex), 7);
+	}
+}
+
 void	*track_philos_routine(void *arg)
 {
 	int		i;
@@ -40,22 +54,20 @@ void	*track_philos_routine(void *arg)
 
 	philo_arr = (t_philo **)arg;
 	wait_sync_start((*philo_arr)->shared_args);
+	set_philos_initial_time_last_ate(philo_arr);
 	while (1)
 	{
 		i = -1;
 		count = 0;
 		while (++i < (*philo_arr)->shared_args->philo_max)
 		{
+			//printf("i = %d\n", i);
 			pwrap(pthread_mutex_lock(&((*philo_arr)[i]).local_mutex), 6);
 			if (((*philo_arr)[i]).time_last_ate
 				+ (*philo_arr)->shared_args->time_die < get_time_ms())
 			{
-				printf("(*philo_arr)[%d].time_last_ate (%ld) + (*philo_arr)->shared_args->time_die (%ld) = %ld\n", i, (*philo_arr)[i].time_last_ate, (*philo_arr)->shared_args->time_die, (*philo_arr)[i].time_last_ate + (*philo_arr)->shared_args->time_die);
-				if ((*philo_arr)[i].time_last_ate == 0)
-				{
-					pwrap(pthread_mutex_unlock(&((*philo_arr)[i]).local_mutex), 7);
-					continue ;
-				}
+//				printf("current time: get_time_ms() = %ld\n", get_time_ms());
+//				printf("(*philo_arr)[%d].time_last_ate (%ld) + (*philo_arr)->shared_args->time_die (%ld) = %ld\n", i, (*philo_arr)[i].time_last_ate, (*philo_arr)->shared_args->time_die, (*philo_arr)[i].time_last_ate + (*philo_arr)->shared_args->time_die);
 				pwrap(pthread_mutex_unlock(&((*philo_arr)[i]).local_mutex), 7);
 				return (one_philo_dead(philo_arr, i));
 			}

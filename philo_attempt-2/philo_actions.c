@@ -23,8 +23,8 @@ void	print_custom_message_and_set_flag(t_philo *philo)
 	}
 	else if (philo->shared_args->flag == ALL_PHILOS_EATEN)
 	{
-//		printf("%ld all philosophers have eaten\n", get_time_ms()
-//			- philo->shared_args->start_time);
+		printf("%ld all philosophers have eaten\n", get_time_ms()
+			- philo->shared_args->start_time);
 		philo->shared_args->flag = TERMINATE;
 	}
 }
@@ -32,19 +32,22 @@ void	print_custom_message_and_set_flag(t_philo *philo)
 int	printf_with_shared_mutex(t_philo *philo, const char *msg)
 {
 	pwrap(pthread_mutex_lock(&philo->shared_args->shared_mutex), 6);
-	if (philo->shared_args->flag == DEFAULT)
+	if (philo->shared_args->flag == PENDING)
 	{
-//		printf("%ld philosopher %d %s\n", get_time_ms() - philo->shared_args->start_time,
-//			philo->philo_nbr, msg);
+		printf("%ld philosopher %d %s\n", get_time_ms() - philo->shared_args->start_time,
+			philo->philo_nbr, msg);
 		pwrap(pthread_mutex_unlock(&philo->shared_args->shared_mutex), 7);
 	}
 	else
 	{
 		print_custom_message_and_set_flag(philo);
+		printf("philo %d in here\n", philo->philo_nbr);
 		pwrap(pthread_mutex_unlock(&philo->shared_args->shared_mutex), 7);
 		return (TERMINATE);
 	}
 	return (DEFAULT);
+//	if (!msg)
+//		return (1);
 }
 
 int	pick_up_forks(t_philo *philo)
@@ -102,9 +105,13 @@ int	eat(t_philo *philo)
 {
 	pwrap(pthread_mutex_lock(&philo->local_mutex), 6);
 	philo->time_last_ate = get_time_ms();
+	printf("philo %d time_last_ate = %ld\n", philo->philo_nbr, philo->time_last_ate);
 	pwrap(pthread_mutex_unlock(&philo->local_mutex), 7);
 	if (printf_with_shared_mutex(philo, "is eating") == TERMINATE)
+	{
+		release_forks(philo);
 		return (TERMINATE);
+	}
 	usleep(philo->shared_args->time_eat * MICROSECS_PER_MS);
 	release_forks(philo);
 	pwrap(pthread_mutex_lock(&philo->local_mutex), 6);

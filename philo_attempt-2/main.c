@@ -22,6 +22,7 @@ void	perform_cleanup(t_philo *philo_arr, t_shared *shared_args)
 		pwrap(pthread_mutex_destroy(&philo_arr[i].local_mutex), 5);
 		pwrap(pthread_mutex_destroy(philo_arr[i].left_fork), 5);
 	}
+	pwrap(pthread_mutex_destroy(&shared_args->start_mutex), 5);
 	pwrap(pthread_mutex_destroy(&shared_args->shared_mutex), 5);
 	free(philo_arr[0].left_fork);
 	free(philo_arr);
@@ -44,10 +45,10 @@ void	create_and_join_threads(t_philo *philo_arr, t_shared *shared_args)
 	while (++i < shared_args->philo_max + 1)
 		pwrap(pthread_create(&thread_arr[i], NULL,
 			&philo_routine, &philo_arr[i - 1]), 1);
-	pwrap(pthread_mutex_lock(&shared_args->shared_mutex), 6);
-	shared_args->flag = DEFAULT;
+	pwrap(pthread_mutex_lock(&shared_args->start_mutex), 6);
+	shared_args->start_flag = true;
 	shared_args->start_time = get_time_ms();
-	pwrap(pthread_mutex_unlock(&shared_args->shared_mutex), 7);
+	pwrap(pthread_mutex_unlock(&shared_args->start_mutex), 7);
 	i = -1;
 	while (++i < shared_args->philo_max + 1)
 		pwrap(pthread_join(thread_arr[i], NULL), 2);

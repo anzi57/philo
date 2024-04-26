@@ -6,9 +6,9 @@ void	*philo_routine(void *arg)
 
 	philo = (t_philo *)arg;
 	wait_sync_start(philo->shared_args);
-	pwrap(pthread_mutex_lock(&philo->local_mutex), 6);
-	philo->time_last_ate = get_time_ms();
-	pwrap(pthread_mutex_unlock(&philo->local_mutex), 7);
+//	pwrap(pthread_mutex_lock(&philo->local_mutex), 6);
+//	philo->time_last_ate = get_time_ms();
+//	pwrap(pthread_mutex_unlock(&philo->local_mutex), 7);
 	while (1)
 	{
 		if (pick_up_forks(philo) == TERMINATE)

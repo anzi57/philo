@@ -30,9 +30,11 @@ typedef struct s_shared
 	long	start_time;
 	int	eat_max;
 	int	flag;
+	bool	start_flag;
 	int	full_philos_nbr;
 	int	dead_philo_nbr;
 	int	dead_philo_time;
+	pthread_mutex_t	start_mutex;
 	pthread_mutex_t	shared_mutex;
 }	t_shared;
 
@@ -56,6 +58,7 @@ void	peform_cleanup(t_philo *philo_arr, t_shared *shared_args);
 void	wait_sync_start(t_shared *shared_args);
 void	*one_philo_dead(t_philo **philo_arr, int index);
 void	*all_philos_eaten(t_philo **philo_arr);
+void	set_philos_initial_time_last_ate(t_philo **philo_arr);
 void	*track_philos_routine(void *arg);
 
 //	philo_routine.c

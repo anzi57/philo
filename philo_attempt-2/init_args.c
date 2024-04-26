@@ -41,8 +41,10 @@ void	init_shared_args(t_shared *shared_args, int ac, char **av)
 	shared_args->time_sleep = (long)ft_atoi(av[4]);
 	shared_args->start_time = 0;
 	shared_args->eat_max = -1;
+	shared_args->start_flag = false;
 	shared_args->flag = PENDING;
 	shared_args->full_philos_nbr = 0;
+	pwrap(pthread_mutex_init(&shared_args->start_mutex, NULL), 4);
 	pwrap(pthread_mutex_init(&shared_args->shared_mutex, NULL), 4);
 	if (ac >= 6)
 		shared_args->eat_max = ft_atoi(av[5]);
@@ -78,6 +80,7 @@ t_philo	*init_philo_arr(t_shared *shared_args)
 		philo_arr[i].eat_count = 0;
 		philo_arr[i].time_last_ate = 0;
 		philo_arr[i].shared_args = shared_args;
+		pwrap(pthread_mutex_init(&philo_arr[i].local_mutex, NULL), 4);
 		assign_forks_to_philo(philo_arr, i,
 			shared_args->philo_max, fork_arr);
 	}
